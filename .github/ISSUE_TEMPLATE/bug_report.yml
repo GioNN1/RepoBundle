@@ -1,0 +1,62 @@
+name: Bug report
+description: Report a reproducible RepoBundle problem
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to report a problem.
+  - type: input
+    id: version
+    attributes:
+      label: RepoBundle version
+      placeholder: 0.1.0
+    validations:
+      required: true
+  - type: input
+    id: vscode
+    attributes:
+      label: VS Code version
+    validations:
+      required: true
+  - type: dropdown
+    id: os
+    attributes:
+      label: Operating system
+      options:
+        - Windows
+        - macOS
+        - Linux
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and what you expected instead.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      placeholder: |
+        1. Open...
+        2. Configure...
+        3. Run...
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: RepoBundle output/logs
+      description: Paste relevant lines from View → Output → RepoBundle. Remove secrets and proprietary content first.
+      render: text
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Sensitive information
+      options:
+        - label: I removed credentials, private keys, proprietary source code, and other sensitive material from this report.
+          required: true

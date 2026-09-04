@@ -1,0 +1,220 @@
+{
+  "name": "repobundle",
+  "displayName": "RepoBundle",
+  "description": "Create safe, retrieval-friendly Markdown snapshots of local repositories for LLM analysis.",
+  "version": "0.1.0",
+  "publisher": "GioNN1",
+  "license": "MIT",
+  "engines": {
+    "vscode": "^1.100.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "keywords": [
+    "llm",
+    "chatgpt",
+    "repository",
+    "context",
+    "bundle",
+    "markdown",
+    "codebase"
+  ],
+  "extensionKind": [
+    "workspace"
+  ],
+  "main": "./dist/src/extension.js",
+  "files": [
+    "dist/",
+    "resources/",
+    "media/",
+    "README.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "galleryBanner": {
+    "color": "#111827",
+    "theme": "dark"
+  },
+  "capabilities": {
+    "virtualWorkspaces": {
+      "supported": false,
+      "description": "RepoBundle requires direct access to the repository filesystem."
+    },
+    "untrustedWorkspaces": {
+      "supported": false,
+      "description": "RepoBundle reads repository files and may invoke Git while creating a snapshot."
+    }
+  },
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "repoBundle",
+          "title": "RepoBundle",
+          "icon": "resources/repobundle.svg"
+        }
+      ]
+    },
+    "views": {
+      "repoBundle": [
+        {
+          "type": "webview",
+          "id": "repoBundle.dashboard",
+          "name": "Dashboard",
+          "contextualTitle": "RepoBundle"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "repoBundle.bundleWorkspace",
+        "title": "Bundle Workspace",
+        "category": "RepoBundle",
+        "icon": "$(package)"
+      },
+      {
+        "command": "repoBundle.bundleFolder",
+        "title": "Bundle This Folder",
+        "category": "RepoBundle"
+      },
+      {
+        "command": "repoBundle.cancelCurrentRun",
+        "title": "Cancel Current Bundle",
+        "category": "RepoBundle",
+        "icon": "$(debug-stop)"
+      },
+      {
+        "command": "repoBundle.openLastIndex",
+        "title": "Open Last Repository Index",
+        "category": "RepoBundle"
+      },
+      {
+        "command": "repoBundle.openLastOutput",
+        "title": "Open Last Output Folder",
+        "category": "RepoBundle"
+      },
+      {
+        "command": "repoBundle.openSettings",
+        "title": "Open Settings",
+        "category": "RepoBundle",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "repoBundle.refresh",
+        "title": "Refresh Dashboard",
+        "category": "RepoBundle",
+        "icon": "$(refresh)"
+      }
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "repoBundle.bundleFolder",
+          "when": "resourceScheme == file && explorerResourceIsFolder",
+          "group": "navigation@90"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "repoBundle.bundleWorkspace",
+          "when": "view == repoBundle.dashboard",
+          "group": "navigation@1"
+        },
+        {
+          "command": "repoBundle.openSettings",
+          "when": "view == repoBundle.dashboard",
+          "group": "navigation@8"
+        },
+        {
+          "command": "repoBundle.refresh",
+          "when": "view == repoBundle.dashboard",
+          "group": "navigation@9"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "RepoBundle",
+      "properties": {
+        "repoBundle.targetMb": {
+          "type": "number",
+          "default": 2.5,
+          "minimum": 0.03,
+          "markdownDescription": "Preferred size of each Markdown bundle in MB.",
+          "scope": "resource"
+        },
+        "repoBundle.hardMaxMb": {
+          "type": "number",
+          "default": 3.25,
+          "minimum": 0.03,
+          "markdownDescription": "Hard maximum size of each Markdown bundle in MB. Must be greater than or equal to `repoBundle.targetMb`.",
+          "scope": "resource"
+        },
+        "repoBundle.maxBundles": {
+          "type": "integer",
+          "default": 0,
+          "minimum": 0,
+          "markdownDescription": "Soft target for the number of bundles. `0` means unlimited. This never forces oversized bundles.",
+          "scope": "resource"
+        },
+        "repoBundle.lineNumbers": {
+          "type": "boolean",
+          "default": false,
+          "description": "Prefix embedded source lines with their original line numbers.",
+          "scope": "resource"
+        },
+        "repoBundle.includeDependencies": {
+          "type": "boolean",
+          "default": false,
+          "description": "Traverse dependency and environment trees such as node_modules and Python virtual environments.",
+          "scope": "resource"
+        },
+        "repoBundle.includeSensitive": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Include obvious credential/key files such as `.env` and private keys. Keep this disabled when bundles may be shared.",
+          "scope": "resource"
+        },
+        "repoBundle.respectGitignore": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Use `git ls-files` and omit ignored files. Disabled by default so filesystem scans also include `.gitignored` project files.",
+          "scope": "resource"
+        },
+        "repoBundle.excludeDirs": {
+          "type": "array",
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "description": "Additional directory basenames to exclude. Matching is case-insensitive.",
+          "scope": "resource"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p .",
+    "watch": "tsc -p . -w",
+    "test": "npm run compile && node --test dist/test/bundler.test.js",
+    "check": "npm run test",
+    "package": "npm run compile && vsce package --no-dependencies"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.0",
+    "@types/vscode": "^1.100.0",
+    "@vscode/vsce": "^3.6.0",
+    "typescript": "^5.8.3"
+  },
+  "author": "GioNN1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GioNN1/RepoBundle.git"
+  },
+  "bugs": {
+    "url": "https://github.com/GioNN1/RepoBundle/issues"
+  },
+  "homepage": "https://github.com/GioNN1/RepoBundle#readme",
+  "icon": "resources/repobundle.png",
+  "preview": true
+}
