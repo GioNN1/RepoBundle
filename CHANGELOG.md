@@ -2,6 +2,16 @@
 
 All notable changes to RepoBundle are documented here.
 
+## 0.1.2 - CI and packaging hardening
+
+- Separate the runtime TypeScript build (`dist/`) from compiled tests (`.test-dist/`).
+- Ensure test fixtures never enter the VSIX or VSCE secret scanning.
+- Use `.vscodeignore` as the single package file-selection mechanism and remove `package.json#files`.
+- Add `vsce ls --tree` to CI before packaging so the exact VSIX contents are visible in logs.
+- Remove the build-only Node.js engine constraint from the extension runtime manifest.
+- Split CI into explicit install/compile/manifest/test steps so failures identify the exact stage.
+- Make `vscode:prepublish` clean stale output and rebuild only runtime files before every VSIX package.
+
 ## 0.1.1
 
 - Rebuilt CI around a committed npm lockfile and `npm ci` for deterministic installs.

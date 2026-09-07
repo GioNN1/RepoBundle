@@ -31,14 +31,40 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      - name: Install build dependencies
+      - name: Toolchain
+        run: |
+          node --version
+          npm --version
+
+      - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Build and test
-        run: npm test
+      - name: Clean generated files
+        run: npm run clean
+
+      - name: Compile extension
+        run: npm run compile
+
+      - name: Compile tests
+        run: npm run compile:test
+
+      - name: Verify extension manifest
+        run: npm run verify:manifest
+
+      - name: Run core tests
+        run: npm run test:core
+
+      - name: Prepare runtime-only package
+        run: |
+          npm run clean
+          npm run compile
+          npm run verify:manifest
+
+      - name: Show files selected for the VSIX
+        run: npm exec --yes --package=@vscode/vsce@3.9.2 -- vsce ls --tree --no-dependencies
 
       - name: Package VSIX
-        run: npx --yes @vscode/vsce@3.9.2 package --no-dependencies --out repobundle-${{ github.ref_name }}.vsix
+        run: npm exec --yes --package=@vscode/vsce@3.9.2 -- vsce package --no-dependencies --out repobundle-${{ github.ref_name }}.vsix
 
       - name: Upload VSIX
         uses: actions/upload-artifact@v4

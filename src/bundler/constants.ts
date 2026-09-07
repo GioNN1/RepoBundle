@@ -1,7 +1,7 @@
 export const GENERATOR_ID = 'repobundle';
 export const LEGACY_GENERATOR_IDS = new Set(['py-bundler']);
 export const FORMAT_VERSION = 1;
-export const GENERATOR_VERSION = '0.1.1';
+export const GENERATOR_VERSION = '0.1.2';
 
 export const DEFAULT_TARGET_MB = 2.5;
 export const DEFAULT_HARD_MAX_MB = 3.25;

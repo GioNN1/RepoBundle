@@ -36,11 +36,28 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
+      - name: Toolchain
+        run: |
+          node --version
+          npm --version
+
       - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
-      - name: Build and test
-        run: npm test
+      - name: Clean generated files
+        run: npm run clean
+
+      - name: Compile extension
+        run: npm run compile
+
+      - name: Compile tests
+        run: npm run compile:test
+
+      - name: Verify extension manifest
+        run: npm run verify:manifest
+
+      - name: Run core tests
+        run: npm run test:core
 
   package-smoke:
     name: Package smoke test
@@ -60,11 +77,20 @@ jobs:
           node-version-file: .nvmrc
           cache: npm
 
-      - name: Install build dependencies
+      - name: Install dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
 
+      - name: Clean and compile runtime only
+        run: |
+          npm run clean
+          npm run compile
+          npm run verify:manifest
+
+      - name: Show files selected for the VSIX
+        run: npm exec --yes --package=@vscode/vsce@3.9.2 -- vsce ls --tree --no-dependencies
+
       - name: Build VSIX smoke artifact
-        run: npx --yes @vscode/vsce@3.9.2 package --no-dependencies --out repobundle-ci.vsix
+        run: npm exec --yes --package=@vscode/vsce@3.9.2 -- vsce package --no-dependencies --out repobundle-ci.vsix
 
       - name: Verify VSIX exists
-        run: test -s repobundle-ci.vsix
+        run: node -e "const fs=require('node:fs'); const p='repobundle-ci.vsix'; if (!fs.existsSync(p) || fs.statSync(p).size === 0) process.exit(1);"

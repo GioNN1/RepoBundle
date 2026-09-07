@@ -2,11 +2,10 @@
   "name": "repobundle",
   "displayName": "RepoBundle",
   "description": "Create safe, retrieval-friendly Markdown snapshots of local repositories for LLM analysis.",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "publisher": "GioNN1",
   "license": "MIT",
   "engines": {
-    "node": ">=22.0.0 <23",
     "vscode": "^1.100.0"
   },
   "categories": [
@@ -25,14 +24,6 @@
     "workspace"
   ],
   "main": "./dist/src/extension.js",
-  "files": [
-    "dist/",
-    "resources/",
-    "media/",
-    "README.md",
-    "CHANGELOG.md",
-    "LICENSE"
-  ],
   "galleryBanner": {
     "color": "#111827",
     "theme": "dark"
@@ -195,14 +186,17 @@
     }
   },
   "scripts": {
-    "compile": "tsc -p .",
+    "clean": "node scripts/clean.mjs",
+    "compile": "tsc -p tsconfig.json",
+    "compile:test": "tsc -p tsconfig.test.json",
     "watch": "tsc -p . -w",
     "verify:manifest": "node scripts/verify-manifest.mjs",
-    "test:core": "node --test dist/test/bundler.test.js",
-    "test": "npm run compile && npm run verify:manifest && npm run test:core",
+    "test:core": "node --test .test-dist/test/bundler.test.js",
+    "test": "npm run clean && npm run compile && npm run compile:test && npm run verify:manifest && npm run test:core",
     "check": "npm test",
-    "vscode:prepublish": "npm run compile",
-    "package": "npx --yes @vscode/vsce@3.9.2 package --no-dependencies"
+    "prepare:runtime": "npm run clean && npm run compile && npm run verify:manifest",
+    "vscode:prepublish": "npm run prepare:runtime",
+    "package": "npm exec --yes --package=@vscode/vsce@3.9.2 -- vsce package --no-dependencies"
   },
   "devDependencies": {
     "@types/node": "22.15.30",
