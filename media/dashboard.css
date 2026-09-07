@@ -138,8 +138,6 @@ h1 { margin: 0; font-size: 18px; line-height: 1.15; letter-spacing: -.2px; }
 .last-meta { padding: 9px 11px; color: var(--vscode-descriptionForeground); font-size: 9px; line-height: 1.4; overflow-wrap: anywhere; }
 .actions { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; padding: 0 11px 11px; }
 .empty { padding: 0 11px 12px; color: var(--vscode-descriptionForeground); font-size: 10px; line-height: 1.5; }
-.warning { padding: 9px 11px; border-top: 1px solid var(--vscode-widget-border, rgba(127,127,127,.18)); color: var(--vscode-descriptionForeground); font-size: 9px; line-height: 1.45; }
-.warning strong { color: var(--vscode-foreground); }
 .foot { display: flex; justify-content: center; }
 .link-btn { border: 0; padding: 3px 6px; background: transparent; color: var(--vscode-textLink-foreground); cursor: pointer; font-size: 10px; }
 .link-btn:hover { color: var(--vscode-textLink-activeForeground); text-decoration: underline; }

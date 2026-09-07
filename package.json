@@ -2,7 +2,7 @@
   "name": "repobundle",
   "displayName": "RepoBundle",
   "description": "Create safe, retrieval-friendly Markdown snapshots of local repositories for LLM analysis.",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "publisher": "GioNN1",
   "license": "MIT",
   "engines": {
@@ -164,7 +164,7 @@
         "repoBundle.includeSensitive": {
           "type": "boolean",
           "default": false,
-          "markdownDescription": "Include obvious credential/key files such as `.env` and private keys. Keep this disabled when bundles may be shared.",
+          "markdownDescription": "Include files normally excluded by RepoBundle's sensitive-file filter.",
           "scope": "resource"
         },
         "repoBundle.respectGitignore": {
@@ -214,5 +214,6 @@
   "homepage": "https://github.com/GioNN1/RepoBundle#readme",
   "icon": "resources/repobundle.png",
   "preview": true,
-  "packageManager": "npm@10.9.2"
+  "packageManager": "npm@10.9.2",
+  "pricing": "Free"
 }

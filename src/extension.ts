@@ -49,18 +49,6 @@ async function ensureDirectory(uri: vscode.Uri): Promise<boolean> {
   }
 }
 
-async function confirmSensitive(options: BundlerOptions): Promise<boolean> {
-  if (!options.includeSensitive) {
-    return true;
-  }
-  const choice = await vscode.window.showWarningMessage(
-    'RepoBundle is configured to include sensitive credential/key files. Generated bundles may contain secrets.',
-    { modal: true },
-    'Continue',
-  );
-  return choice === 'Continue';
-}
-
 function progressPercent(progress: BundlerProgress): number | undefined {
   const ranges = {
     scan: [0, 10],
@@ -96,9 +84,6 @@ async function runBundle(
   }
 
   const options = buildOptions(root);
-  if (!(await confirmSensitive(options))) {
-    return undefined;
-  }
 
   const cancellationSource = new vscode.CancellationTokenSource();
   activeCancellationSource = cancellationSource;
@@ -178,16 +163,6 @@ async function toggleBooleanSetting(key: string): Promise<void> {
   const resource = configurationResource();
   const config = vscode.workspace.getConfiguration('repoBundle', resource);
   const current = config.get<boolean>(key, false);
-  if (key === 'includeSensitive' && !current) {
-    const choice = await vscode.window.showWarningMessage(
-      'Enabling this setting allows obvious credential/key files to be embedded in generated bundles.',
-      { modal: true },
-      'Enable',
-    );
-    if (choice !== 'Enable') {
-      return;
-    }
-  }
   const target = resource === undefined ? vscode.ConfigurationTarget.Global : vscode.ConfigurationTarget.WorkspaceFolder;
   await config.update(key, !current, target);
 }

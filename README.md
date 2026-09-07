@@ -12,7 +12,7 @@
   <a href="https://github.com/GioNN1/RepoBundle/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/GioNN1/RepoBundle/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/GioNN1/RepoBundle/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
   <img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-1.100%2B-007ACC">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.1.4-6f42c1">
+  <img alt="Version" src="https://img.shields.io/badge/version-0.1.5-6f42c1">
 </p>
 
 RepoBundle is a VS Code extension for creating safe, near-lossless repository snapshots that are convenient to upload to ChatGPT or other LLM tools. It is designed for code review, architecture analysis, debugging, migration planning, onboarding, and any workflow where an AI system needs structured repository context instead of a blind file dump.
@@ -72,7 +72,7 @@ Each generated index carries an explicit snapshot identity:
 ```md
 - Generator: `repobundle`
 - Format version: `1`
-- Generator version: `0.1.4`
+- Generator version: `0.1.5`
 ```
 
 RepoBundle does **not** create a hidden marker file in the output directory.
@@ -92,9 +92,6 @@ RepoBundle intentionally favors a near-lossless snapshot while keeping accidenta
 - writes to a temporary sibling directory first and commits output only after a successful run;
 - refuses to replace a non-empty output directory containing unknown user files.
 
-> [!WARNING]
-> Enabling `repoBundle.includeSensitive` may put credentials, private keys, tokens, or other secrets into generated Markdown. RepoBundle asks for explicit confirmation before running with this option enabled.
-
 ## Settings
 
 | Setting | Default | Purpose |
@@ -104,7 +101,7 @@ RepoBundle intentionally favors a near-lossless snapshot while keeping accidenta
 | `repoBundle.maxBundles` | `0` | Soft bundle-count target; `0` means unlimited |
 | `repoBundle.lineNumbers` | `false` | Prefix embedded source lines with original line numbers |
 | `repoBundle.includeDependencies` | `false` | Include dependency trees and virtual environments |
-| `repoBundle.includeSensitive` | `false` | Include obvious credential/key files |
+| `repoBundle.includeSensitive` | `false` | Include files normally excluded by the sensitive-file filter |
 | `repoBundle.respectGitignore` | `false` | Use Git discovery and omit ignored files |
 | `repoBundle.excludeDirs` | `[]` | Additional directory basenames to exclude |
 
@@ -153,7 +150,20 @@ Install the generated `.vsix` from VS Code with:
 
 **Extensions → … → Install from VSIX…**
 
-The extension manifest currently uses `GioNN1` as the publisher ID. If your VS Code Marketplace publisher ID is different, change only the `publisher` field in `package.json` before publishing.
+The extension manifest currently uses `GioNN1` as the publisher ID. The Visual Studio Marketplace publisher ID must match this value exactly; otherwise change the `publisher` field before publishing.
+
+### Publish to the VS Code Marketplace
+
+To make RepoBundle installable by everyone from the VS Code Extensions view:
+
+1. Create or open your publisher at the Visual Studio Marketplace publisher management page.
+2. Make sure its publisher ID matches `GioNN1` in `package.json`.
+3. Create a Git tag such as `v0.1.5` and let the **Package VSIX** GitHub Action build the installable artifact, or run `npm run package` locally.
+4. Download the generated `.vsix`.
+5. In the Marketplace publisher page choose **New Extension → Visual Studio Code** and upload the `.vsix`.
+6. Publish the extension. Once indexed, users can search for **RepoBundle** directly from VS Code and click **Install**.
+
+For the first public release, manual VSIX upload is intentionally the simplest publishing path. Automated Marketplace publishing can be added later without changing the extension itself.
 
 ## Project structure
 

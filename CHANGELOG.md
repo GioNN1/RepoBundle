@@ -2,6 +2,12 @@
 
 All notable changes to RepoBundle are documented here.
 
+## 0.1.5 - Sensitive toggle UX
+
+- Remove the modal confirmation when enabling `Include sensitive files`.
+- Remove the repeated sensitive-files warning from the dashboard; the explicit toggle remains disabled by default.
+- Keep sensitive-file filtering unchanged when the toggle is off.
+
 ## 0.1.4 - Manifest dependency consistency fix
 
 - Stop duplicating the `@types/node` and TypeScript version pins inside the manifest verifier.
