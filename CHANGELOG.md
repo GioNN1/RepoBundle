@@ -2,6 +2,13 @@
 
 All notable changes to RepoBundle are documented here.
 
+## 0.1.4 - Manifest dependency consistency fix
+
+- Stop duplicating the `@types/node` and TypeScript version pins inside the manifest verifier.
+- Verify that build-tool versions are exact pins in `package.json`.
+- Verify `package.json`, the lockfile root, and the resolved lockfile package entry all agree on each pinned build dependency.
+- Keep `@types/vscode` pinned to `1.100.0` to match the declared VS Code compatibility target.
+
 ## 0.1.3 - Windows symlink path fix
 
 - Normalize Windows extended-length (`\\?\`) paths before repository containment checks.

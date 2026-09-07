@@ -12,7 +12,7 @@
   <a href="https://github.com/GioNN1/RepoBundle/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/GioNN1/RepoBundle/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/GioNN1/RepoBundle/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
   <img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-1.100%2B-007ACC">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.1.3-6f42c1">
+  <img alt="Version" src="https://img.shields.io/badge/version-0.1.4-6f42c1">
 </p>
 
 RepoBundle is a VS Code extension for creating safe, near-lossless repository snapshots that are convenient to upload to ChatGPT or other LLM tools. It is designed for code review, architecture analysis, debugging, migration planning, onboarding, and any workflow where an AI system needs structured repository context instead of a blind file dump.
@@ -72,7 +72,7 @@ Each generated index carries an explicit snapshot identity:
 ```md
 - Generator: `repobundle`
 - Format version: `1`
-- Generator version: `0.1.3`
+- Generator version: `0.1.4`
 ```
 
 RepoBundle does **not** create a hidden marker file in the output directory.
