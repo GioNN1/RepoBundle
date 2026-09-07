@@ -2,6 +2,13 @@
 
 All notable changes to RepoBundle are documented here.
 
+## 0.1.3 - Windows symlink path fix
+
+- Normalize Windows extended-length (`\\?\`) paths before repository containment checks.
+- Canonicalize the repository root before comparing resolved symlink targets.
+- Preserve sensitive-target detection for internal symlinks on Windows instead of misclassifying them as outside the repository.
+- Add a platform-independent regression test for Windows extended-length path containment.
+
 ## 0.1.2 - CI and packaging hardening
 
 - Separate the runtime TypeScript build (`dist/`) from compiled tests (`.test-dist/`).

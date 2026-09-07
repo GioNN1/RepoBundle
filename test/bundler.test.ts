@@ -6,6 +6,7 @@ import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { bundleRepository } from '../src/bundler/bundler';
 import { markdownInlineCode } from '../src/bundler/markdown';
+import { isWithin, toPosixRelative } from '../src/bundler/security';
 import { BundlerCancelledError, BundlerOptions } from '../src/bundler/types';
 
 async function withTempDir(run: (dir: string) => Promise<void>): Promise<void> {
@@ -35,6 +36,16 @@ function options(repoDir: string, overrides: Partial<BundlerOptions> = {}): Bund
 test('markdownInlineCode safely handles backticks in paths', () => {
   assert.equal(markdownInlineCode('odd`name.ts'), '`` odd`name.ts ``');
   assert.equal(markdownInlineCode('normal.ts'), '`normal.ts`');
+});
+
+test('Windows extended-length paths compare as the same repository root', () => {
+  const repo = 'D:\\work\\repo';
+  const extendedChild = '\\\\?\\D:\\work\\repo\\.env';
+  const extendedOutside = '\\\\?\\D:\\work\\other\\.env';
+
+  assert.equal(isWithin(extendedChild, repo), true);
+  assert.equal(toPosixRelative(repo, extendedChild), '.env');
+  assert.equal(isWithin(extendedOutside, repo), false);
 });
 
 test('default bundle is signed in the index and writes no marker file', async () => {

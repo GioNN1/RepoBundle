@@ -20,13 +20,41 @@ const IMPORTANT_NAME_PATTERNS = [
   /^\.env\.(?:example|sample|template)$/i,
 ];
 
+function stripWindowsExtendedPathPrefix(value: string): string {
+  if (value.startsWith('\\\\?\\UNC\\')) {
+    return `\\\\${value.slice(8)}`;
+  }
+  if (value.startsWith('\\\\?\\')) {
+    return value.slice(4);
+  }
+  return value;
+}
+
+function looksLikeWindowsAbsolutePath(value: string): boolean {
+  return /^[A-Za-z]:[\\/]/.test(value) || value.startsWith('\\\\');
+}
+
+function pathOpsFor(...values: readonly string[]): typeof path {
+  return process.platform === 'win32' || values.some(looksLikeWindowsAbsolutePath) ? path.win32 : path;
+}
+
+function normalizeForPathOps(value: string, ops: typeof path): string {
+  return ops === path.win32 ? stripWindowsExtendedPathPrefix(value) : value;
+}
+
 export function isWithin(child: string, parent: string): boolean {
-  const relative = path.relative(path.resolve(parent), path.resolve(child));
-  return relative === '' || (!relative.startsWith(`..${path.sep}`) && relative !== '..' && !path.isAbsolute(relative));
+  const ops = pathOpsFor(child, parent);
+  const normalizedParent = normalizeForPathOps(parent, ops);
+  const normalizedChild = normalizeForPathOps(child, ops);
+  const relative = ops.relative(ops.resolve(normalizedParent), ops.resolve(normalizedChild));
+  return relative === '' || (!relative.startsWith(`..${ops.sep}`) && relative !== '..' && !ops.isAbsolute(relative));
 }
 
 export function toPosixRelative(repoDir: string, absolutePath: string): string {
-  return path.relative(repoDir, absolutePath).split(path.sep).join('/');
+  const ops = pathOpsFor(repoDir, absolutePath);
+  const normalizedRepo = normalizeForPathOps(repoDir, ops);
+  const normalizedAbsolute = normalizeForPathOps(absolutePath, ops);
+  return ops.relative(normalizedRepo, normalizedAbsolute).split(ops.sep).join('/');
 }
 
 export function isSensitive(relativePath: string): boolean {

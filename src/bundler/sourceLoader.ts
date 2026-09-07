@@ -35,6 +35,9 @@ export async function loadSourceFiles(
 ): Promise<{ sources: SourceFile[]; omitted: NotEmbeddedFile[] }> {
   const sources: SourceFile[] = [];
   const omitted: NotEmbeddedFile[] = [];
+  // Canonicalize the repository root once so Windows realpath() results (which may
+  // use the extended-length \\?\ prefix) are compared against an equivalent root.
+  const canonicalRepoDir = await fs.realpath(repoDir);
   const unique = [...new Set(relativePaths.map((item) => item.replace(/\\/g, '/')))];
   unique.sort(compareCaseInsensitivePath);
 
@@ -69,7 +72,7 @@ export async function loadSourceFiles(
           omitted.push({ relativePath, reason: `broken/unreadable symlink: ${describeError(error)}` });
           continue;
         }
-        if (!isWithin(resolved, repoDir)) {
+        if (!isWithin(resolved, canonicalRepoDir)) {
           try {
             size = (await fs.stat(fullPath)).size;
           } catch {
@@ -83,7 +86,7 @@ export async function loadSourceFiles(
           omitted.push({ relativePath, reason: 'symlink target is not a regular file' });
           continue;
         }
-        targetRelative = toPosixRelative(repoDir, resolved);
+        targetRelative = toPosixRelative(canonicalRepoDir, resolved);
       }
 
       if (!stat.isFile()) {
