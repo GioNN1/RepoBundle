@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="resources/repobundle.svg" width="84" height="84" alt="RepoBundle logo">
+  <img src="resources/repobundle.png" width="84" height="84" alt="RepoBundle logo">
 </p>
 
 <h1 align="center">RepoBundle</h1>
@@ -12,7 +12,7 @@
   <a href="https://github.com/GioNN1/RepoBundle/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/GioNN1/RepoBundle/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/GioNN1/RepoBundle/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
   <img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-1.100%2B-007ACC">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.1.0-6f42c1">
+  <img alt="Version" src="https://img.shields.io/badge/version-0.1.1-6f42c1">
 </p>
 
 RepoBundle is a VS Code extension for creating safe, near-lossless repository snapshots that are convenient to upload to ChatGPT or other LLM tools. It is designed for code review, architecture analysis, debugging, migration planning, onboarding, and any workflow where an AI system needs structured repository context instead of a blind file dump.
@@ -72,7 +72,7 @@ Each generated index carries an explicit snapshot identity:
 ```md
 - Generator: `repobundle`
 - Format version: `1`
-- Generator version: `0.1.0`
+- Generator version: `0.1.1`
 ```
 
 RepoBundle does **not** create a hidden marker file in the output directory.
@@ -118,8 +118,8 @@ Legacy compatibility exists only for safe migration. New snapshots use the RepoB
 
 Requirements:
 
-- Node.js 22+
-- npm
+- Node.js 22.x (CI is pinned to 22.16.0)
+- npm 10+
 - VS Code 1.100+
 
 Clone and install:
@@ -127,11 +127,21 @@ Clone and install:
 ```bash
 git clone https://github.com/GioNN1/RepoBundle.git
 cd RepoBundle
-npm install
+npm ci
 npm test
 ```
 
 Open the repository in VS Code and press **F5**, selecting **Run RepoBundle Extension** if prompted. VS Code opens an Extension Development Host where RepoBundle appears in the Activity Bar.
+
+### Continuous integration
+
+The repository runs three checks on pushes to `main` and pull requests:
+
+- build + core tests on Ubuntu;
+- build + core tests on Windows;
+- a VSIX packaging smoke test on Ubuntu.
+
+Dependencies are installed with the committed `package-lock.json` via `npm ci`. The VSCE CLI is pinned and used only by packaging jobs, not by the cross-platform test matrix.
 
 ### Package a VSIX
 

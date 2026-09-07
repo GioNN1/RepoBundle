@@ -9,19 +9,41 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: package-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   package:
+    name: Build VSIX
     runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      VSCE_STORE: file
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - run: npm install --no-audit --no-fund
-      - run: npm test
-      - run: npm run package
-      - uses: actions/upload-artifact@v4
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install build dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Build and test
+        run: npm test
+
+      - name: Package VSIX
+        run: npx --yes @vscode/vsce@3.9.2 package --no-dependencies --out repobundle-${{ github.ref_name }}.vsix
+
+      - name: Upload VSIX
+        uses: actions/upload-artifact@v4
         with:
           name: repobundle-vsix
           path: '*.vsix'
           if-no-files-found: error
+          retention-days: 14

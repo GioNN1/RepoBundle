@@ -16,14 +16,14 @@ Repository: https://github.com/GioNN1/RepoBundle
 
 Requirements:
 
-- Node.js 22+
-- npm
+- Node.js 22.x (use the version in `.nvmrc`)
+- npm 10+
 - VS Code 1.100+
 
 ```bash
 git clone https://github.com/GioNN1/RepoBundle.git
 cd RepoBundle
-npm install
+npm ci
 npm test
 ```
 

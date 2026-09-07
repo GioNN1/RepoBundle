@@ -2,6 +2,15 @@
 
 All notable changes to RepoBundle are documented here.
 
+## 0.1.1
+
+- Rebuilt CI around a committed npm lockfile and `npm ci` for deterministic installs.
+- Pinned Node.js, TypeScript, `@types/node`, and `@types/vscode` to versions compatible with the declared VS Code engine.
+- Removed `@vscode/vsce` from the normal test dependency graph; packaging installs a pinned VSCE version only when needed.
+- Added a manifest verification step that catches missing runtime assets, stale version pins, and lockfile drift before tests run.
+- Replaced the SVG image in the Marketplace README with the PNG asset while retaining the SVG for the Activity Bar.
+- Updated the generator version to `0.1.1`.
+
 ## 0.1.0
 
 - Renamed the project and extension to **RepoBundle**.

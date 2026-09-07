@@ -2,10 +2,11 @@
   "name": "repobundle",
   "displayName": "RepoBundle",
   "description": "Create safe, retrieval-friendly Markdown snapshots of local repositories for LLM analysis.",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "publisher": "GioNN1",
   "license": "MIT",
   "engines": {
+    "node": ">=22.0.0 <23",
     "vscode": "^1.100.0"
   },
   "categories": [
@@ -196,15 +197,17 @@
   "scripts": {
     "compile": "tsc -p .",
     "watch": "tsc -p . -w",
-    "test": "npm run compile && node --test dist/test/bundler.test.js",
-    "check": "npm run test",
-    "package": "npm run compile && vsce package --no-dependencies"
+    "verify:manifest": "node scripts/verify-manifest.mjs",
+    "test:core": "node --test dist/test/bundler.test.js",
+    "test": "npm run compile && npm run verify:manifest && npm run test:core",
+    "check": "npm test",
+    "vscode:prepublish": "npm run compile",
+    "package": "npx --yes @vscode/vsce@3.9.2 package --no-dependencies"
   },
   "devDependencies": {
-    "@types/node": "^22.15.0",
-    "@types/vscode": "^1.100.0",
-    "@vscode/vsce": "^3.6.0",
-    "typescript": "^5.8.3"
+    "@types/node": "22.15.30",
+    "@types/vscode": "1.100.0",
+    "typescript": "5.8.3"
   },
   "author": "GioNN1",
   "repository": {
@@ -216,5 +219,6 @@
   },
   "homepage": "https://github.com/GioNN1/RepoBundle#readme",
   "icon": "resources/repobundle.png",
-  "preview": true
+  "preview": true,
+  "packageManager": "npm@10.9.2"
 }
