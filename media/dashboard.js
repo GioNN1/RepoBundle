@@ -66,7 +66,7 @@
           switchRow('respectGitignore', 'Respect .gitignore', 'Use Git discovery instead of a full filesystem scan.', s.respectGitignore) +
           switchRow('lineNumbers', 'Source line numbers', 'Prefix embedded lines with their original line numbers.', s.lineNumbers) +
           switchRow('includeDependencies', 'Include dependencies', 'Traverse dependency and virtual-environment trees.', s.includeDependencies) +
-          switchRow('includeSensitive', 'Include sensitive files', 'Include files normally excluded by the sensitive-file filter.', s.includeSensitive) +
+          switchRow('includeSensitive', 'Include sensitive files for this run', 'One-shot option; resets when bundling starts.', s.includeSensitive) +
         '</div>' +
         '<div class="value-row">' +
           '<button class="value" data-number="targetMb"><div class="value-number">' + esc(s.targetMb) + '</div><div class="value-label">Target MB</div></button>' +

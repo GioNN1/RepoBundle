@@ -1,8 +1,8 @@
 {
   "name": "repobundle",
   "displayName": "RepoBundle",
-  "description": "Create safe, retrieval-friendly Markdown snapshots of local repositories for LLM analysis.",
-  "version": "0.1.5",
+  "description": "Create retrieval-friendly Markdown snapshots of repositories for LLM analysis.",
+  "version": "0.1.6",
   "publisher": "GioNN1",
   "license": "MIT",
   "engines": {
@@ -161,16 +161,10 @@
           "description": "Traverse dependency and environment trees such as node_modules and Python virtual environments.",
           "scope": "resource"
         },
-        "repoBundle.includeSensitive": {
-          "type": "boolean",
-          "default": false,
-          "markdownDescription": "Include files normally excluded by RepoBundle's sensitive-file filter.",
-          "scope": "resource"
-        },
         "repoBundle.respectGitignore": {
           "type": "boolean",
-          "default": false,
-          "markdownDescription": "Use `git ls-files` and omit ignored files. Disabled by default so filesystem scans also include `.gitignored` project files.",
+          "default": true,
+          "markdownDescription": "Use `git ls-files` in Git work trees so ignored files are omitted. If Git-backed discovery is unavailable, RepoBundle falls back to a filesystem scan and records that in the index.",
           "scope": "resource"
         },
         "repoBundle.excludeDirs": {

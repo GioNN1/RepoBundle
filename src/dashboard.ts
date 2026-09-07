@@ -1,3 +1,4 @@
+import { randomBytes } from 'node:crypto';
 import * as vscode from 'vscode';
 import { BundleResult } from './bundler/types';
 
@@ -35,7 +36,6 @@ interface DashboardMessage {
 const BOOLEAN_SETTING_KEYS = new Set([
   'respectGitignore',
   'includeDependencies',
-  'includeSensitive',
   'lineNumbers',
 ]);
 
@@ -51,6 +51,7 @@ export class RepoBundleDashboardProvider implements vscode.WebviewViewProvider {
   private running = false;
   private progressPercent: number | undefined;
   private progressMessage = '';
+  private includeSensitiveForNextRun = false;
 
   public constructor(private readonly context: vscode.ExtensionContext) {
     this.lastRun = context.workspaceState.get<LastRunRecord>('repoBundle.lastRun');
@@ -108,6 +109,13 @@ export class RepoBundleDashboardProvider implements vscode.WebviewViewProvider {
     return this.lastRun;
   }
 
+  public consumeIncludeSensitiveForNextRun(): boolean {
+    const enabled = this.includeSensitiveForNextRun;
+    this.includeSensitiveForNextRun = false;
+    this.refresh();
+    return enabled;
+  }
+
   private currentState(): DashboardState {
     const folders = vscode.workspace.workspaceFolders ?? [];
     const primary = folders[0];
@@ -126,9 +134,9 @@ export class RepoBundleDashboardProvider implements vscode.WebviewViewProvider {
       progressPercent: this.progressPercent,
       progressMessage: this.progressMessage,
       settings: {
-        respectGitignore: config.get<boolean>('respectGitignore', false),
+        respectGitignore: config.get<boolean>('respectGitignore', true),
         includeDependencies: config.get<boolean>('includeDependencies', false),
-        includeSensitive: config.get<boolean>('includeSensitive', false),
+        includeSensitive: this.includeSensitiveForNextRun,
         lineNumbers: config.get<boolean>('lineNumbers', false),
         targetMb: config.get<number>('targetMb', 2.5),
         hardMaxMb: config.get<number>('hardMaxMb', 3.25),
@@ -174,7 +182,10 @@ export class RepoBundleDashboardProvider implements vscode.WebviewViewProvider {
         await vscode.commands.executeCommand('repoBundle.editExcludeDirs');
         break;
       case 'toggleSetting':
-        if (typeof message.key === 'string' && BOOLEAN_SETTING_KEYS.has(message.key)) {
+        if (message.key === 'includeSensitive') {
+          this.includeSensitiveForNextRun = !this.includeSensitiveForNextRun;
+          this.refresh();
+        } else if (typeof message.key === 'string' && BOOLEAN_SETTING_KEYS.has(message.key)) {
           await vscode.commands.executeCommand('repoBundle.toggleBooleanSetting', message.key);
         }
         break;
@@ -216,10 +227,5 @@ export class RepoBundleDashboardProvider implements vscode.WebviewViewProvider {
 }
 
 function getNonce(): string {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let value = '';
-  for (let index = 0; index < 32; index += 1) {
-    value += alphabet.charAt(Math.floor(Math.random() * alphabet.length));
-  }
-  return value;
+  return randomBytes(24).toString('base64url');
 }

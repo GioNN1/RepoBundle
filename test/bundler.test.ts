@@ -73,7 +73,7 @@ test('default bundle is signed in the index and writes no marker file', async ()
     assert.match(index, /ignored\.txt/);
     assert.match(index, /\.env.*sensitive credential\/key file excluded/);
     assert.match(index, /node_modules\/.*dependency\/environment directory/);
-    assert.ok(!outputEntries.includes('.py_bundler_output'));
+    assert.equal(outputEntries.filter((name) => name.startsWith('.')).length, 0);
     assert.doesNotMatch(bundleText, /super-secret/);
     assert.doesNotMatch(bundleText, /dependency\n/);
   });
@@ -179,29 +179,6 @@ test('cancellation aborts before changing output', async () => {
   });
 });
 
-test('legacy marker output is migrated to signed index without keeping the marker', async () => {
-  await withTempDir(async (root) => {
-    const repo = path.join(root, 'repo');
-    const output = path.join(root, 'repo_bundled');
-    await fs.mkdir(repo, { recursive: true });
-    await fs.mkdir(output, { recursive: true });
-    await fs.writeFile(path.join(repo, 'a.txt'), 'new content\n');
-    await fs.writeFile(path.join(output, '.py_bundler_output'), 'py_bundler managed output v1\n');
-    await fs.writeFile(
-      path.join(output, '00_REPO_INDEX.md'),
-      '# Repository index: repo\n\n## Bundle index\n\n- old\n\n## Files not embedded\n\n- None.\n',
-    );
-    await fs.writeFile(path.join(output, 'bundle_001.md'), '# Repository bundle: repo (1/1)\n\nold\n');
-
-    const result = await bundleRepository(options(repo));
-    const entries = await fs.readdir(result.outputDir);
-    const index = await fs.readFile(result.indexPath, 'utf8');
-    assert.ok(!entries.includes('.py_bundler_output'));
-    assert.match(index, /- Generator: `repobundle`/);
-    assert.match(index, /- Format version: `1`/);
-  });
-});
-
 test('a clean signed output can be regenerated in place', async () => {
   await withTempDir(async (root) => {
     const repo = path.join(root, 'repo');
@@ -218,7 +195,9 @@ test('a clean signed output can be regenerated in place', async () => {
   });
 });
 
-test('legacy signed py-bundler output is migrated to RepoBundle signature', async () => {
+
+
+test('generated-looking output without the current RepoBundle signature is never replaced', async () => {
   await withTempDir(async (root) => {
     const repo = path.join(root, 'repo');
     const output = path.join(root, 'repo_bundled');
@@ -227,13 +206,26 @@ test('legacy signed py-bundler output is migrated to RepoBundle signature', asyn
     await fs.writeFile(path.join(repo, 'a.txt'), 'new content\n');
     await fs.writeFile(
       path.join(output, '00_REPO_INDEX.md'),
-      '# Repository index: repo\n\n## Snapshot\n\n- Generator: `py-bundler`\n- Format version: `1`\n\n## Bundle index\n\n- old\n\n## Files not embedded\n\n- None.\n',
+      '# Repository index: repo\n\n## Snapshot\n\n- Generator: `other-generator`\n- Format version: `1`\n\n## Bundle index\n\n- old\n\n## Files not embedded\n\n- None.\n',
     );
     await fs.writeFile(path.join(output, 'bundle_001.md'), '# Repository bundle: repo (1/1)\n\nold\n');
 
-    const result = await bundleRepository(options(repo));
+    await assert.rejects(bundleRepository(options(repo)), /Refusing to replace/);
+    assert.match(await fs.readFile(path.join(output, 'bundle_001.md'), 'utf8'), /old/);
+  });
+});
+
+test('respectGitignore falls back to a filesystem scan outside a Git work tree', async () => {
+  await withTempDir(async (root) => {
+    const repo = path.join(root, 'repo');
+    await fs.mkdir(repo, { recursive: true });
+    await fs.writeFile(path.join(repo, '.gitignore'), 'ignored.txt\n');
+    await fs.writeFile(path.join(repo, 'ignored.txt'), 'fallback content\n');
+    await fs.writeFile(path.join(repo, 'keep.txt'), 'keep\n');
+
+    const result = await bundleRepository(options(repo, { respectGitignore: true }));
     const index = await fs.readFile(result.indexPath, 'utf8');
-    assert.match(index, /- Generator: `repobundle`/);
-    assert.match(index, /- Format version: `1`/);
+    assert.match(index, /Git work tree unavailable, so \.gitignore could not be applied/);
+    assert.match(index, /ignored\.txt/);
   });
 });

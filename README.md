@@ -5,17 +5,17 @@
 <h1 align="center">RepoBundle</h1>
 
 <p align="center">
-  Turn a local repository into compact, retrieval-friendly Markdown bundles for LLM analysis — directly from VS Code.
+  Turn a repository into compact, retrieval-friendly Markdown bundles for LLM analysis — directly from VS Code.
 </p>
 
 <p align="center">
   <a href="https://github.com/GioNN1/RepoBundle/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/GioNN1/RepoBundle/actions/workflows/ci.yml/badge.svg"></a>
   <a href="https://github.com/GioNN1/RepoBundle/blob/main/LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/License-MIT-blue.svg"></a>
   <img alt="VS Code" src="https://img.shields.io/badge/VS%20Code-1.100%2B-007ACC">
-  <img alt="Version" src="https://img.shields.io/badge/version-0.1.5-6f42c1">
+  <img alt="Version" src="https://img.shields.io/badge/version-0.1.6-6f42c1">
 </p>
 
-RepoBundle is a VS Code extension for creating safe, near-lossless repository snapshots that are convenient to upload to ChatGPT or other LLM tools. It is designed for code review, architecture analysis, debugging, migration planning, onboarding, and any workflow where an AI system needs structured repository context instead of a blind file dump.
+RepoBundle is a VS Code extension for creating near-lossless repository snapshots that are convenient to upload to ChatGPT or other LLM tools. It is designed for code review, architecture analysis, debugging, migration planning, onboarding, and any workflow where an AI system needs structured repository context instead of a blind file dump.
 
 ## Sidebar dashboard
 
@@ -23,7 +23,7 @@ RepoBundle adds its own icon to the VS Code Activity Bar. Opening it shows a the
 
 - bundle the current workspace with one click;
 - follow live progress and cancel an active run;
-- toggle Git ignore behavior, source line numbers, dependency trees, and sensitive files;
+- toggle Git ignore behavior, source line numbers, dependency trees, and a one-shot sensitive-file inclusion option;
 - edit target size, hard bundle limit, soft maximum bundle count, and custom directory exclusions;
 - inspect the latest run summary;
 - open the generated repository index or output folder.
@@ -32,7 +32,7 @@ The dashboard uses VS Code theme variables and adapts automatically to light and
 
 ## Quick start
 
-1. Open a local repository in VS Code.
+1. Open a repository in VS Code.
 2. Click **RepoBundle** in the Activity Bar.
 3. Click **Bundle workspace**.
 4. RepoBundle creates the snapshot next to the repository.
@@ -72,16 +72,16 @@ Each generated index carries an explicit snapshot identity:
 ```md
 - Generator: `repobundle`
 - Format version: `1`
-- Generator version: `0.1.5`
+- Generator version: `0.1.6`
 ```
 
 RepoBundle does **not** create a hidden marker file in the output directory.
 
-## Safe defaults
+## Safer defaults
 
 RepoBundle intentionally favors a near-lossless snapshot while keeping accidental sharing safer by default:
 
-- scans the filesystem by default, including project files ignored by Git;
+- respects `.gitignore` by default in Git work trees; if Git-backed discovery is unavailable, it falls back to a filesystem scan and records that fact in the index;
 - excludes VCS metadata, caches, dependency/environment trees, obvious binary formats, and obvious credential/key files;
 - detects Python virtual environments by `pyvenv.cfg`, not only by directory name;
 - does not follow directory symlinks;
@@ -101,15 +101,10 @@ RepoBundle intentionally favors a near-lossless snapshot while keeping accidenta
 | `repoBundle.maxBundles` | `0` | Soft bundle-count target; `0` means unlimited |
 | `repoBundle.lineNumbers` | `false` | Prefix embedded source lines with original line numbers |
 | `repoBundle.includeDependencies` | `false` | Include dependency trees and virtual environments |
-| `repoBundle.includeSensitive` | `false` | Include files normally excluded by the sensitive-file filter |
-| `repoBundle.respectGitignore` | `false` | Use Git discovery and omit ignored files |
+| `repoBundle.respectGitignore` | `true` | Use Git discovery in Git work trees and omit ignored files |
 | `repoBundle.excludeDirs` | `[]` | Additional directory basenames to exclude |
 
-## Legacy migration
-
-RepoBundle can recognize clean output created by the previous `py-bundler` implementation, including the legacy `.py_bundler_output` marker and the signed `py-bundler` repository index. The next successful regeneration migrates that output to the new `repobundle` signature and removes the old marker.
-
-Legacy compatibility exists only for safe migration. New snapshots use the RepoBundle identity everywhere.
+The dashboard also offers **Include sensitive files for this run**. It is an in-memory, one-shot option: it is not stored in VS Code settings and resets as soon as a bundle run starts.
 
 ## Development
 
@@ -132,10 +127,11 @@ Open the repository in VS Code and press **F5**, selecting **Run RepoBundle Exte
 
 ### Continuous integration
 
-The repository runs three checks on pushes to `main` and pull requests:
+The repository runs cross-platform checks on pushes to `main` and pull requests:
 
 - build + core tests on Ubuntu;
 - build + core tests on Windows;
+- build + core tests on macOS;
 - a VSIX packaging smoke test on Ubuntu.
 
 Dependencies are installed with the committed `package-lock.json` via `npm ci`. The VSCE CLI is pinned and used only by packaging jobs, not by the cross-platform test matrix.
@@ -158,7 +154,7 @@ To make RepoBundle installable by everyone from the VS Code Extensions view:
 
 1. Create or open your publisher at the Visual Studio Marketplace publisher management page.
 2. Make sure its publisher ID matches `GioNN1` in `package.json`.
-3. Create a Git tag such as `v0.1.5` and let the **Package VSIX** GitHub Action build the installable artifact, or run `npm run package` locally.
+3. Create a Git tag such as `v0.1.6` and let the **Package VSIX** GitHub Action build the installable artifact, or run `npm run package` locally.
 4. Download the generated `.vsix`.
 5. In the Marketplace publisher page choose **New Extension → Visual Studio Code** and upload the `.vsix`.
 6. Publish the extension. Once indexed, users can search for **RepoBundle** directly from VS Code and click **Install**.
@@ -189,7 +185,7 @@ The bundler core does not import the VS Code API. That keeps the core independen
 
 ## Security and privacy
 
-RepoBundle processes repository files locally and writes its output locally. The extension itself does not upload repository contents to an external service.
+RepoBundle processes repository files on the VS Code extension host that owns the workspace and writes its output there. The extension itself does not upload repository contents to an external service.
 
 Generated bundles can contain proprietary source code and, when explicitly enabled, sensitive files. Review generated material before sharing it with a third party or an external AI service.
 

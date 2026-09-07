@@ -1,7 +1,7 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { BUNDLE_OUTPUT_RE, FORMAT_VERSION, GENERATOR_ID, LEGACY_GENERATOR_IDS, LEGACY_OUTPUT_MARKER_NAME } from './constants';
+import { BUNDLE_OUTPUT_RE, FORMAT_VERSION, GENERATOR_ID } from './constants';
 
 async function exists(candidate: string): Promise<boolean> {
   try {
@@ -16,7 +16,6 @@ function isGeneratedOutputEntry(name: string): boolean {
   return (
     name === '00_REPO_INDEX.md' ||
     name === '01_NOT_EMBEDDED.md' ||
-    name === LEGACY_OUTPUT_MARKER_NAME ||
     BUNDLE_OUTPUT_RE.test(name)
   );
 }
@@ -68,12 +67,7 @@ async function looksLikeManagedOutput(outputDir: string, names: readonly string[
     prefix.includes(`- Generator: \`${GENERATOR_ID}\``) &&
     prefix.includes(`- Format version: \`${FORMAT_VERSION}\``)
   );
-  const legacySigned = [...LEGACY_GENERATOR_IDS].some((id) => (
-    prefix.includes(`- Generator: \`${id}\``) &&
-    prefix.includes(`- Format version: \`${FORMAT_VERSION}\``)
-  ));
-  const legacy = names.includes(LEGACY_OUTPUT_MARKER_NAME) || !prefix.includes('- Generator:') || legacySigned;
-  if (!signed && !legacy) {
+  if (!signed) {
     return false;
   }
   return bundleHeadersAreValid(outputDir, names);

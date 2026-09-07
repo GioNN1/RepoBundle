@@ -6,7 +6,7 @@ import { BundlerCancelledError, BundlerOptions, BundlerProgress, BundleResult } 
 import { LastRunRecord, RepoBundleDashboardProvider } from './dashboard';
 
 const OUTPUT_CHANNEL_NAME = 'RepoBundle';
-const BOOLEAN_SETTING_KEYS = new Set(['respectGitignore', 'includeDependencies', 'includeSensitive', 'lineNumbers']);
+const BOOLEAN_SETTING_KEYS = new Set(['respectGitignore', 'includeDependencies', 'lineNumbers']);
 const NUMBER_SETTING_KEYS = new Set(['targetMb', 'hardMaxMb', 'maxBundles']);
 let activeCancellationSource: vscode.CancellationTokenSource | undefined;
 
@@ -14,7 +14,7 @@ function configurationFor(root: vscode.Uri): vscode.WorkspaceConfiguration {
   return vscode.workspace.getConfiguration('repoBundle', root);
 }
 
-function buildOptions(root: vscode.Uri): BundlerOptions {
+function buildOptions(root: vscode.Uri, includeSensitive: boolean): BundlerOptions {
   const config = configurationFor(root);
   return {
     repoDir: root.fsPath,
@@ -23,8 +23,8 @@ function buildOptions(root: vscode.Uri): BundlerOptions {
     maxBundles: config.get<number>('maxBundles', 0),
     lineNumbers: config.get<boolean>('lineNumbers', false),
     includeDependencies: config.get<boolean>('includeDependencies', false),
-    includeSensitive: config.get<boolean>('includeSensitive', false),
-    respectGitignore: config.get<boolean>('respectGitignore', false),
+    includeSensitive,
+    respectGitignore: config.get<boolean>('respectGitignore', true),
     excludeDirs: config.get<string[]>('excludeDirs', []),
   };
 }
@@ -32,7 +32,7 @@ function buildOptions(root: vscode.Uri): BundlerOptions {
 async function pickWorkspaceFolder(): Promise<vscode.Uri | undefined> {
   const folders = vscode.workspace.workspaceFolders ?? [];
   if (folders.length === 0) {
-    void vscode.window.showErrorMessage('RepoBundle: open a local folder or workspace first.');
+    void vscode.window.showErrorMessage('RepoBundle: open a folder or workspace first.');
     return undefined;
   }
   if (folders.length === 1) {
@@ -79,11 +79,11 @@ async function runBundle(
     return undefined;
   }
   if (root.scheme !== 'file' || !(await ensureDirectory(root))) {
-    void vscode.window.showErrorMessage('RepoBundle currently supports local filesystem folders only.');
+    void vscode.window.showErrorMessage('RepoBundle currently supports filesystem-backed folders only.');
     return undefined;
   }
 
-  const options = buildOptions(root);
+  const options = buildOptions(root, dashboard.consumeIncludeSensitiveForNextRun());
 
   const cancellationSource = new vscode.CancellationTokenSource();
   activeCancellationSource = cancellationSource;
@@ -162,7 +162,7 @@ async function toggleBooleanSetting(key: string): Promise<void> {
   }
   const resource = configurationResource();
   const config = vscode.workspace.getConfiguration('repoBundle', resource);
-  const current = config.get<boolean>(key, false);
+  const current = config.get<boolean>(key, key === 'respectGitignore');
   const target = resource === undefined ? vscode.ConfigurationTarget.Global : vscode.ConfigurationTarget.WorkspaceFolder;
   await config.update(key, !current, target);
 }

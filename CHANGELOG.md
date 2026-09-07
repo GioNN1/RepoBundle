@@ -2,6 +2,15 @@
 
 All notable changes to RepoBundle are documented here.
 
+## 0.1.6 - Public release hardening
+
+- Make `Respect .gitignore` enabled by default in Git work trees, with an explicit filesystem-scan fallback when Git-backed discovery is unavailable.
+- Make sensitive-file inclusion a one-shot, in-memory dashboard option that resets when a bundle run starts and is never persisted to workspace settings.
+- Require the current RepoBundle generator signature before replacing any non-empty output directory.
+- Use cryptographically strong random CSP nonces for the dashboard webview.
+- Add macOS to the cross-platform CI test matrix.
+- Clarify remote-workspace privacy wording and remove absolute safety language from Marketplace copy.
+
 ## 0.1.5 - Sensitive toggle UX
 
 - Remove the modal confirmation when enabling `Include sensitive files`.
@@ -53,8 +62,6 @@ All notable changes to RepoBundle are documented here.
 - Added sensitive-file, symlink-target, binary, dependency-tree, and virtual-environment protections.
 - Added line-aware chunking and hard bundle-size enforcement.
 - Added `00_REPO_INDEX.md`, optional `01_NOT_EMBEDDED.md`, and an embedded-text SHA-256 fingerprint.
-- Replaced the old marker-file identity with the signed `repobundle` repository index.
-- Added safe migration support for legacy `py-bundler` output.
 - Added atomic output replacement and protection against deleting unknown files.
 - Added MIT licensing and GitHub contribution, security, issue-template, Dependabot, and CI scaffolding.
 - Added GitHub repository metadata for `GioNN1/RepoBundle`, a VSIX packaging workflow, and Marketplace icon assets.

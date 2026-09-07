@@ -1,7 +1,6 @@
 export const GENERATOR_ID = 'repobundle';
-export const LEGACY_GENERATOR_IDS = new Set(['py-bundler']);
 export const FORMAT_VERSION = 1;
-export const GENERATOR_VERSION = '0.1.5';
+export const GENERATOR_VERSION = '0.1.6';
 
 export const DEFAULT_TARGET_MB = 2.5;
 export const DEFAULT_HARD_MAX_MB = 3.25;
@@ -9,7 +8,6 @@ export const DEFAULT_APPROX_CHARS_PER_TOKEN = 3.0;
 export const BUNDLE_HEADER_RESERVE_BYTES = 8192;
 export const LARGE_FILE_STREAM_THRESHOLD_BYTES = 32 * 1024 * 1024;
 export const STREAM_READ_BYTES = 1024 * 1024;
-export const LEGACY_OUTPUT_MARKER_NAME = '.py_bundler_output';
 export const BUNDLE_OUTPUT_RE = /^bundle_\d+\.md$/;
 
 export const ALWAYS_EXCLUDED_DIR_NAMES = new Set([

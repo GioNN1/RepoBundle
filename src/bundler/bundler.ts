@@ -82,10 +82,7 @@ export async function bundleRepository(
   let excludedDirs;
   let discoveryMode: string;
 
-  if (options.respectGitignore) {
-    if (!gitInfo.available) {
-      throw new Error('respectGitignore requires a Git work tree and the git executable.');
-    }
+  if (options.respectGitignore && gitInfo.available) {
     const gitPaths = await listGitFiles(options.repoDir, runtime);
     const filtered = await filterDiscoveredPaths(
       options.repoDir,
@@ -96,7 +93,7 @@ export async function bundleRepository(
     );
     relativePaths = filtered.files;
     excludedDirs = filtered.excludedDirs;
-    discoveryMode = 'git ls-files (-co --exclude-standard); ignored files excluded by request';
+    discoveryMode = 'git ls-files (-co --exclude-standard); ignored files excluded';
   } else {
     const discovered = await listFilesystemFiles(
       options.repoDir,
@@ -106,7 +103,12 @@ export async function bundleRepository(
     );
     relativePaths = discovered.files;
     excludedDirs = discovered.excludedDirs;
-    discoveryMode = 'filesystem scan; .gitignore intentionally ignored';
+    if (options.respectGitignore) {
+      discoveryMode = 'filesystem scan; Git work tree unavailable, so .gitignore could not be applied';
+      log(runtime, 'Git-backed ignore discovery is unavailable; falling back to a filesystem scan.');
+    } else {
+      discoveryMode = 'filesystem scan; .gitignore intentionally ignored';
+    }
   }
   runtime.onProgress?.({ stage: 'scan', completed: 1, total: 1, message: `Discovered ${relativePaths.length} paths` });
   log(runtime, `Discovery: ${discoveryMode}`);

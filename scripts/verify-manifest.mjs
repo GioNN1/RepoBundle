@@ -49,7 +49,6 @@ requireValue(!/^dist(?:\/\*\*)?$/m.test(vscodeIgnore), '.vscodeignore must not e
 requireValue(!/^media(?:\/\*\*)?$/m.test(vscodeIgnore), '.vscodeignore must not exclude media/.');
 requireValue(!/^resources(?:\/\*\*)?$/m.test(vscodeIgnore), '.vscodeignore must not exclude resources/.');
 requireValue(/^\.test-dist\/\*\*$/m.test(vscodeIgnore), '.vscodeignore must exclude .test-dist/.');
-requireValue(/^dist\/test\/\*\*$/m.test(vscodeIgnore), '.vscodeignore must exclude legacy dist/test/.');
 requireValue(!fs.existsSync(path.join(root, 'dist', 'test')), 'Runtime build must not contain compiled tests under dist/test/.');
 
 const lockPath = path.join(root, 'package-lock.json');
