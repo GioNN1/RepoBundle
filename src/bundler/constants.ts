@@ -1,6 +1,6 @@
 export const GENERATOR_ID = 'repobundle';
 export const FORMAT_VERSION = 1;
-export const GENERATOR_VERSION = '0.1.6';
+export const GENERATOR_VERSION = '0.1.7';
 
 export const DEFAULT_TARGET_MB = 2.5;
 export const DEFAULT_HARD_MAX_MB = 3.25;
@@ -116,3 +116,4 @@ export const SPECIAL_LANGUAGES: Readonly<Record<string, string>> = {
   gemfile: 'ruby',
   rakefile: 'ruby',
 };
+

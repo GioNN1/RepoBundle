@@ -1,8 +1,8 @@
 {
   "name": "repobundle",
   "displayName": "RepoBundle",
-  "description": "Create retrieval-friendly Markdown snapshots of repositories for LLM analysis.",
-  "version": "0.1.6",
+  "description": "Bundle repositories into structured Markdown for LLM analysis and context sharing.",
+  "version": "0.1.7",
   "publisher": "GioNN1",
   "license": "MIT",
   "engines": {
@@ -207,7 +207,6 @@
   },
   "homepage": "https://github.com/GioNN1/RepoBundle#readme",
   "icon": "resources/repobundle.png",
-  "preview": true,
   "packageManager": "npm@10.9.2",
   "pricing": "Free"
 }

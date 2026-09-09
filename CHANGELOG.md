@@ -2,6 +2,14 @@
 
 All notable changes to RepoBundle are documented here.
 
+## 0.1.7 - Marketplace presentation
+
+- Rewrite the root README as a user-facing Marketplace product page focused on getting started, features, commands, settings, safety, privacy, support, and licensing.
+- Move VSIX packaging and Marketplace upload instructions into maintainer-only `docs/RELEASING.md`.
+- Remove the static version badge from the README to avoid stale release metadata.
+- Remove the extension `preview` flag for the normal public Marketplace release.
+- Refresh the Marketplace description to emphasize repository bundling and context sharing.
+
 ## 0.1.6 - Public release hardening
 
 - Make `Respect .gitignore` enabled by default in Git work trees, with an explicit filesystem-scan fallback when Git-backed discovery is unavailable.
@@ -65,3 +73,4 @@ All notable changes to RepoBundle are documented here.
 - Added atomic output replacement and protection against deleting unknown files.
 - Added MIT licensing and GitHub contribution, security, issue-template, Dependabot, and CI scaffolding.
 - Added GitHub repository metadata for `GioNN1/RepoBundle`, a VSIX packaging workflow, and Marketplace icon assets.
+

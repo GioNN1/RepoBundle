@@ -48,3 +48,8 @@ Protections that prevent destructive output replacement, path escape, or acciden
 
 - Bugs: https://github.com/GioNN1/RepoBundle/issues/new?template=bug_report.yml
 - Features: https://github.com/GioNN1/RepoBundle/issues/new?template=feature_request.yml
+
+
+## Maintainer releases
+
+Release packaging and Marketplace publication are documented separately in [docs/RELEASING.md](docs/RELEASING.md). Keep release-engineering instructions out of the root README because that file is rendered as the extension's Marketplace description.

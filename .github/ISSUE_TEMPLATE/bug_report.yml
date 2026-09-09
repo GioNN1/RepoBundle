@@ -10,7 +10,7 @@ body:
     id: version
     attributes:
       label: RepoBundle version
-      placeholder: 0.1.6
+      placeholder: 0.1.7
     validations:
       required: true
   - type: input
@@ -60,3 +60,4 @@ body:
       options:
         - label: I removed credentials, private keys, proprietary source code, and other sensitive material from this report.
           required: true
+
