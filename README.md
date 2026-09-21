@@ -24,7 +24,7 @@ No account, API key, or external service is required. RepoBundle reads and write
 2. Open a repository or project folder.
 3. Click the **RepoBundle** icon in the Activity Bar.
 4. Click **Bundle workspace**.
-5. RepoBundle creates the snapshot next to the repository and opens `00_REPO_INDEX.md` when it finishes.
+5. RepoBundle creates the snapshot in `_RepoBundle/` at the project root and opens `00_REPO_INDEX.md` when it finishes.
 
 You can also run RepoBundle from the Command Palette or right-click a folder in the Explorer and choose **RepoBundle: Bundle This Folder**.
 
@@ -34,17 +34,24 @@ A repository such as:
 
 ```text
 my-project/
+  src/
+  README.md
 ```
 
 produces:
 
 ```text
-my-project_bundled/
-  00_REPO_INDEX.md
-  bundle_001.md
-  bundle_002.md
-  ...
+my-project/
+  src/
+  README.md
+  _RepoBundle/
+    00_REPO_INDEX.md
+    bundle_001.md
+    bundle_002.md
+    ...
 ```
+
+When the folder is in a Git work tree and `_RepoBundle/` is not already ignored, RepoBundle offers to add `/_RepoBundle/` to the project's `.gitignore`. The output directory is always excluded from RepoBundle's own discovery, even if you choose **Not now**.
 
 When needed, RepoBundle also creates `01_NOT_EMBEDDED.md`, an inventory of discovered files whose contents were not embedded.
 
@@ -66,6 +73,7 @@ Large text files are split into numbered parts with original line ranges instead
 - **Explicit omissions** — skipped files and excluded directories are recorded in the index.
 - **Git-aware discovery** — `.gitignore` is respected by default in Git work trees.
 - **Large-file support** — large text files are streamed and chunked instead of loaded as one giant string.
+- **Project-local output** — snapshots live in `_RepoBundle/` at the project root, which RepoBundle always excludes from its own discovery.
 - **Safe output replacement** — existing non-empty output is replaced only when it is a recognized RepoBundle snapshot with no unknown entries.
 - **No upload step** — the extension itself does not send repository contents to an external service.
 
@@ -75,7 +83,7 @@ RepoBundle adds a dedicated Activity Bar view with:
 
 - one-click workspace bundling;
 - live progress and cancellation;
-- Git ignore, line-number, dependency, and one-shot sensitive-file controls;
+- Git ignore, line-number, dependency, and session-only sensitive-file controls;
 - editable target size, hard limit, bundle count, and excluded directories;
 - latest-run metrics;
 - shortcuts to the generated index and output folder.
@@ -105,7 +113,7 @@ The dashboard uses VS Code theme colors and adapts to light and dark themes.
 | `repoBundle.respectGitignore` | `true` | Use Git discovery in Git work trees and omit ignored files |
 | `repoBundle.excludeDirs` | `[]` | Additional directory basenames to exclude |
 
-The dashboard also offers **Include sensitive files for this run**. It is an in-memory, one-shot option and is never stored in workspace settings.
+The dashboard also offers **Include sensitive files**. It is kept only in memory for the current VS Code session: bundling does not reset it, and it is not stored in workspace settings. Reloading or closing VS Code resets it to off.
 
 ## Safety and privacy
 
@@ -117,7 +125,7 @@ By default it:
 - excludes VCS metadata, caches, dependency/environment trees, known binary formats, and obvious credential/key files;
 - does not follow directory symlinks;
 - accepts file symlinks only when their resolved target stays inside the repository and re-checks the target for sensitive or binary content;
-- writes to a temporary sibling directory before committing a completed snapshot;
+- writes to a temporary working directory before committing a completed snapshot;
 - refuses to replace a non-empty output directory containing unknown user files.
 
 RepoBundle itself does **not** upload repository contents. Generated bundles can still contain proprietary code or secrets stored in ordinary-looking text files. The sensitive-file filter is intentionally conservative and filename-based; it cannot guarantee that arbitrary secrets are absent. Review generated material before sharing it outside your trusted environment.

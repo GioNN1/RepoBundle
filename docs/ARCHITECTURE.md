@@ -16,6 +16,6 @@ This boundary is intentional: core behavior can be unit-tested with Node alone a
 
 ## Output safety
 
-A run writes to a temporary sibling directory first. Only a completed snapshot is committed. Existing non-empty output directories are replaced only when they carry the current RepoBundle signature and contain no unknown entries.
+The default output is `<repository>/_RepoBundle`. RepoBundle always excludes that directory (and its transient temp/backup directories) from repository discovery, independent of `.gitignore`. A run writes to a temporary working directory first. Only a completed snapshot is committed. Existing non-empty output directories are replaced only when they carry the current RepoBundle signature and contain no unknown entries.
 
 The output identity is stored in `00_REPO_INDEX.md`; RepoBundle does not create a hidden marker file.

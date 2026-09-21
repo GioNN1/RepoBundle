@@ -5,6 +5,8 @@ import * as os from 'node:os';
 import * as path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { bundleRepository } from '../src/bundler/bundler';
+import { isGitPathIgnored } from '../src/bundler/git';
+import { appendOutputToGitignore } from '../src/gitignore';
 import { markdownInlineCode } from '../src/bundler/markdown';
 import { isWithin, toPosixRelative } from '../src/bundler/security';
 import { BundlerCancelledError, BundlerOptions } from '../src/bundler/types';
@@ -61,6 +63,7 @@ test('default bundle is signed in the index and writes no marker file', async ()
     await fs.writeFile(path.join(repo, 'image.png'), Buffer.from([0x89, 0x50, 0x4e, 0x47]));
 
     const result = await bundleRepository(options(repo));
+    assert.equal(result.outputDir, path.join(repo, '_RepoBundle'));
     const index = await fs.readFile(result.indexPath, 'utf8');
     const outputEntries = await fs.readdir(result.outputDir);
     const bundleText = (await Promise.all(
@@ -143,6 +146,35 @@ test('unknown output entries prevent destructive replacement', async () => {
   });
 });
 
+
+test('gitignore helper appends the project-local RepoBundle rule safely', async () => {
+  await withTempDir(async (root) => {
+    const repo = path.join(root, 'repo');
+    await fs.mkdir(repo, { recursive: true });
+    await fs.writeFile(path.join(repo, '.gitignore'), 'dist/');
+
+    await appendOutputToGitignore(repo);
+    await appendOutputToGitignore(repo);
+    assert.equal(await fs.readFile(path.join(repo, '.gitignore'), 'utf8'), 'dist/\n/_RepoBundle/\n');
+  });
+});
+
+test('Git ignore detection recognizes the RepoBundle output rule', async (t) => {
+  await withTempDir(async (root) => {
+    const repo = path.join(root, 'repo');
+    await fs.mkdir(repo, { recursive: true });
+    const git = spawnSync('git', ['init', repo], { encoding: 'utf8' });
+    if (git.status !== 0) {
+      t.skip('git is unavailable');
+      return;
+    }
+
+    assert.equal(await isGitPathIgnored(repo, '_RepoBundle/'), false);
+    await fs.writeFile(path.join(repo, '.gitignore'), '/_RepoBundle/\n');
+    assert.equal(await isGitPathIgnored(repo, '_RepoBundle/'), true);
+  });
+});
+
 test('respectGitignore uses git discovery and omits ignored files', async (t) => {
   await withTempDir(async (root) => {
     const repo = path.join(root, 'repo');
@@ -200,7 +232,7 @@ test('a clean signed output can be regenerated in place', async () => {
 test('generated-looking output without the current RepoBundle signature is never replaced', async () => {
   await withTempDir(async (root) => {
     const repo = path.join(root, 'repo');
-    const output = path.join(root, 'repo_bundled');
+    const output = path.join(repo, '_RepoBundle');
     await fs.mkdir(repo, { recursive: true });
     await fs.mkdir(output, { recursive: true });
     await fs.writeFile(path.join(repo, 'a.txt'), 'new content\n');
@@ -212,6 +244,42 @@ test('generated-looking output without the current RepoBundle signature is never
 
     await assert.rejects(bundleRepository(options(repo)), /Refusing to replace/);
     assert.match(await fs.readFile(path.join(output, 'bundle_001.md'), 'utf8'), /old/);
+  });
+});
+
+
+test('RepoBundle output inside the repository is never self-bundled', async () => {
+  await withTempDir(async (root) => {
+    const repo = path.join(root, 'repo');
+    await fs.mkdir(repo, { recursive: true });
+    await fs.writeFile(path.join(repo, 'a.txt'), 'first\n');
+
+    const first = await bundleRepository(options(repo));
+    assert.equal(first.outputDir, path.join(repo, '_RepoBundle'));
+
+    await fs.writeFile(path.join(repo, 'a.txt'), 'second\n');
+    await fs.mkdir(path.join(repo, '._RepoBundle.tmp-orphan'), { recursive: true });
+    await fs.writeFile(path.join(repo, '._RepoBundle.tmp-orphan', 'stale.txt'), 'must not be bundled\n');
+    const second = await bundleRepository(options(repo));
+    const bundleNames = (await fs.readdir(second.outputDir)).filter((name) => /^bundle_\d+\.md$/.test(name));
+    const contents = (await Promise.all(bundleNames.map((name) => fs.readFile(path.join(second.outputDir, name), 'utf8')))).join('\n');
+
+    assert.match(contents, /second/);
+    assert.doesNotMatch(contents, /## File: `_RepoBundle\//);
+    assert.doesNotMatch(contents, /must not be bundled/);
+  });
+});
+
+test('arbitrary output directories inside the repository remain forbidden', async () => {
+  await withTempDir(async (root) => {
+    const repo = path.join(root, 'repo');
+    await fs.mkdir(repo, { recursive: true });
+    await fs.writeFile(path.join(repo, 'a.txt'), 'hello\n');
+
+    await assert.rejects(
+      bundleRepository(options(repo, { outputDir: path.join(repo, 'custom-output') })),
+      /only output directory allowed inside the repository is _RepoBundle/,
+    );
   });
 });
 

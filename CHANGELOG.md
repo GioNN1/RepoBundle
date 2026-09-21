@@ -2,6 +2,14 @@
 
 All notable changes to RepoBundle are documented here.
 
+## 0.1.8 - Project-local output
+
+- Keep **Include sensitive files** enabled for the lifetime of the current VS Code session instead of resetting it after each bundle run.
+- Move generated snapshots to `_RepoBundle/` inside the project root.
+- Always exclude RepoBundle output and transient working directories from discovery to prevent self-bundling, even when `.gitignore` is disabled or unchanged.
+- Offer to add `/_RepoBundle/` to the project `.gitignore` when Git reports that the output is not already ignored.
+- Keep the `.gitignore` prompt non-blocking: choosing **Not now** still allows bundling and suppresses repeated prompts for that project until VS Code reloads.
+
 ## 0.1.7 - Marketplace presentation
 
 - Rewrite the root README as a user-facing Marketplace product page focused on getting started, features, commands, settings, safety, privacy, support, and licensing.

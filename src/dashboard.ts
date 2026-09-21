@@ -51,7 +51,7 @@ export class RepoBundleDashboardProvider implements vscode.WebviewViewProvider {
   private running = false;
   private progressPercent: number | undefined;
   private progressMessage = '';
-  private includeSensitiveForNextRun = false;
+  private includeSensitiveForSession = false;
 
   public constructor(private readonly context: vscode.ExtensionContext) {
     this.lastRun = context.workspaceState.get<LastRunRecord>('repoBundle.lastRun');
@@ -109,11 +109,8 @@ export class RepoBundleDashboardProvider implements vscode.WebviewViewProvider {
     return this.lastRun;
   }
 
-  public consumeIncludeSensitiveForNextRun(): boolean {
-    const enabled = this.includeSensitiveForNextRun;
-    this.includeSensitiveForNextRun = false;
-    this.refresh();
-    return enabled;
+  public getIncludeSensitiveForSession(): boolean {
+    return this.includeSensitiveForSession;
   }
 
   private currentState(): DashboardState {
@@ -136,7 +133,7 @@ export class RepoBundleDashboardProvider implements vscode.WebviewViewProvider {
       settings: {
         respectGitignore: config.get<boolean>('respectGitignore', true),
         includeDependencies: config.get<boolean>('includeDependencies', false),
-        includeSensitive: this.includeSensitiveForNextRun,
+        includeSensitive: this.includeSensitiveForSession,
         lineNumbers: config.get<boolean>('lineNumbers', false),
         targetMb: config.get<number>('targetMb', 2.5),
         hardMaxMb: config.get<number>('hardMaxMb', 3.25),
@@ -183,7 +180,7 @@ export class RepoBundleDashboardProvider implements vscode.WebviewViewProvider {
         break;
       case 'toggleSetting':
         if (message.key === 'includeSensitive') {
-          this.includeSensitiveForNextRun = !this.includeSensitiveForNextRun;
+          this.includeSensitiveForSession = !this.includeSensitiveForSession;
           this.refresh();
         } else if (typeof message.key === 'string' && BOOLEAN_SETTING_KEYS.has(message.key)) {
           await vscode.commands.executeCommand('repoBundle.toggleBooleanSetting', message.key);

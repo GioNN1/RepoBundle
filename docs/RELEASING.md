@@ -29,8 +29,8 @@ The generated `.vsix` is a local packaging artifact. Do not document maintainer 
 4. Tag the commit with the matching version, for example:
 
    ```bash
-   git tag v0.1.7
-   git push origin v0.1.7
+   git tag v0.1.8
+   git push origin v0.1.8
    ```
 
 5. The **Package VSIX** workflow builds the release package and uploads the `repobundle-vsix` artifact to the GitHub Actions run.

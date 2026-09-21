@@ -2,7 +2,7 @@
   "name": "repobundle",
   "displayName": "RepoBundle",
   "description": "Bundle repositories into structured Markdown for LLM analysis and context sharing.",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "publisher": "GioNN1",
   "license": "MIT",
   "engines": {

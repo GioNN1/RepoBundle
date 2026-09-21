@@ -4,6 +4,7 @@ import {
   BUNDLE_HEADER_RESERVE_BYTES,
   DEFAULT_HARD_MAX_MB,
   DEFAULT_TARGET_MB,
+  OUTPUT_DIR_NAME,
 } from './constants';
 import { getGitInfo, listGitFiles } from './git';
 import { bundleFilename } from './markdown';
@@ -18,7 +19,7 @@ import { BundleResult, BundlerOptions, BundlerRuntime } from './types';
 
 function normalizeOptions(options: BundlerOptions): Required<BundlerOptions> {
   const repoDir = path.resolve(options.repoDir);
-  const outputDir = path.resolve(options.outputDir ?? path.join(path.dirname(repoDir), `${path.basename(repoDir)}_bundled`));
+  const outputDir = path.resolve(options.outputDir ?? path.join(repoDir, OUTPUT_DIR_NAME));
   return {
     repoDir,
     outputDir,
@@ -53,8 +54,10 @@ function validateOptions(options: Required<BundlerOptions>): void {
   if (options.maxBundles < 0) {
     throw new Error('maxBundles cannot be negative.');
   }
-  if (isWithin(options.outputDir, options.repoDir)) {
-    throw new Error('The output directory must be outside the repository to avoid self-bundling.');
+  const managedOutputDir = path.resolve(path.join(options.repoDir, OUTPUT_DIR_NAME));
+  const isManagedOutput = isWithin(options.outputDir, managedOutputDir) && isWithin(managedOutputDir, options.outputDir);
+  if (isWithin(options.outputDir, options.repoDir) && !isManagedOutput) {
+    throw new Error(`The only output directory allowed inside the repository is ${OUTPUT_DIR_NAME}.`);
   }
   if (isWithin(options.repoDir, options.outputDir)) {
     throw new Error('The output directory must not contain the repository; refusing a destructive ancestor output path.');

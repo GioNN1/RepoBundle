@@ -6,6 +6,7 @@ import {
   IMPORTANT_BASENAMES,
   KNOWN_BINARY_SUFFIXES,
   LANGUAGE_BY_SUFFIX,
+  OUTPUT_DIR_NAME,
   SAFE_SENSITIVE_EXAMPLES,
   SENSITIVE_EXACT_NAMES,
   SENSITIVE_SUFFIXES,
@@ -140,6 +141,10 @@ export async function shouldExcludeDirectory(
   additionalExcludes: ReadonlySet<string>,
 ): Promise<string | undefined> {
   const name = path.basename(directory).toLowerCase();
+  const outputName = OUTPUT_DIR_NAME.toLowerCase();
+  if (name === outputName || name.startsWith(`.${outputName}.tmp-`) || name.startsWith(`.${outputName}.old-`)) {
+    return 'RepoBundle output/work directory';
+  }
   if (additionalExcludes.has(name)) {
     return 'user-specified directory exclusion';
   }

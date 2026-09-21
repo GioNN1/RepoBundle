@@ -102,3 +102,25 @@ export async function listGitFiles(repoDir: string, runtime: BundlerRuntime): Pr
     .filter((item: string) => item.length > 0)
     .map((item: string) => item.replace(/\\/g, '/'));
 }
+
+export async function isGitPathIgnored(repoDir: string, relativePath: string): Promise<boolean | undefined> {
+  try {
+    const inside = await runGit(repoDir, ['rev-parse', '--is-inside-work-tree'], {});
+    if (inside.code !== 0 || inside.stdout.toString('utf8').trim() !== 'true') {
+      return undefined;
+    }
+    const result = await runGit(repoDir, ['check-ignore', '-q', '--no-index', '--', relativePath], {});
+    if (result.code === 0) {
+      return true;
+    }
+    if (result.code === 1) {
+      return false;
+    }
+    return undefined;
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
+      return undefined;
+    }
+    throw error;
+  }
+}

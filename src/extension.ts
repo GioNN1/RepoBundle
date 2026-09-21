@@ -2,6 +2,9 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
 import { bundleRepository } from './bundler/bundler';
+import { OUTPUT_DIR_NAME } from './bundler/constants';
+import { isGitPathIgnored } from './bundler/git';
+import { appendOutputToGitignore, OUTPUT_GITIGNORE_ENTRY } from './gitignore';
 import { BundlerCancelledError, BundlerOptions, BundlerProgress, BundleResult } from './bundler/types';
 import { LastRunRecord, RepoBundleDashboardProvider } from './dashboard';
 
@@ -9,6 +12,7 @@ const OUTPUT_CHANNEL_NAME = 'RepoBundle';
 const BOOLEAN_SETTING_KEYS = new Set(['respectGitignore', 'includeDependencies', 'lineNumbers']);
 const NUMBER_SETTING_KEYS = new Set(['targetMb', 'hardMaxMb', 'maxBundles']);
 let activeCancellationSource: vscode.CancellationTokenSource | undefined;
+const gitignorePromptedRoots = new Set<string>();
 
 function configurationFor(root: vscode.Uri): vscode.WorkspaceConfiguration {
   return vscode.workspace.getConfiguration('repoBundle', root);
@@ -18,6 +22,7 @@ function buildOptions(root: vscode.Uri, includeSensitive: boolean): BundlerOptio
   const config = configurationFor(root);
   return {
     repoDir: root.fsPath,
+    outputDir: path.join(root.fsPath, OUTPUT_DIR_NAME),
     targetMb: config.get<number>('targetMb', 2.5),
     hardMaxMb: config.get<number>('hardMaxMb', 3.25),
     maxBundles: config.get<number>('maxBundles', 0),
@@ -46,6 +51,45 @@ async function ensureDirectory(uri: vscode.Uri): Promise<boolean> {
     return (await fs.stat(uri.fsPath)).isDirectory();
   } catch {
     return false;
+  }
+}
+
+
+async function maybeOfferGitignore(root: vscode.Uri, output: vscode.OutputChannel): Promise<void> {
+  const key = path.resolve(root.fsPath);
+  if (gitignorePromptedRoots.has(key)) {
+    return;
+  }
+
+  let ignored: boolean | undefined;
+  try {
+    ignored = await isGitPathIgnored(root.fsPath, `${OUTPUT_DIR_NAME}/`);
+  } catch (error) {
+    output.appendLine(`Could not check .gitignore status for ${OUTPUT_DIR_NAME}: ${error instanceof Error ? error.message : String(error)}`);
+    return;
+  }
+  if (ignored !== false) {
+    return;
+  }
+
+  gitignorePromptedRoots.add(key);
+  const addLabel = 'Add to .gitignore';
+  const choice = await vscode.window.showInformationMessage(
+    `RepoBundle stores generated snapshots in ${OUTPUT_DIR_NAME}. Add ${OUTPUT_GITIGNORE_ENTRY} to this project's .gitignore?`,
+    addLabel,
+    'Not now',
+  );
+  if (choice !== addLabel) {
+    return;
+  }
+
+  try {
+    await appendOutputToGitignore(root.fsPath);
+    void vscode.window.showInformationMessage(`RepoBundle: added ${OUTPUT_GITIGNORE_ENTRY} to .gitignore.`);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    output.appendLine(`Could not update .gitignore: ${message}`);
+    void vscode.window.showErrorMessage(`RepoBundle: ${message}`);
   }
 }
 
@@ -83,7 +127,8 @@ async function runBundle(
     return undefined;
   }
 
-  const options = buildOptions(root, dashboard.consumeIncludeSensitiveForNextRun());
+  await maybeOfferGitignore(root, output);
+  const options = buildOptions(root, dashboard.getIncludeSensitiveForSession());
 
   const cancellationSource = new vscode.CancellationTokenSource();
   activeCancellationSource = cancellationSource;
